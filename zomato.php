@@ -1,17 +1,24 @@
 <?php 
     if(!empty($_GET['location'])){
        
-        $zomato_url = 'https://developers.zomato.com/api/v2.1/search?entity_id=259&entity_type=city';
+        // Retrieve City Code
+        $city_url = 'https://developers.zomato.com/api/v2.1/cities?q=' . $_GET['location'];
+        $cityResource = curl_init($city_url);
+        curl_setopt($cityResource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($cityResource, CURLOPT_HTTPHEADER, array(
+            'user-key: 93a6b94e44720afab279f89636f42cae'
+        ));
+        $cityResult = curl_exec($cityResource);
+        $cityData = json_decode($cityResult, true);
+        $cityId = $cityData['location_suggestions'][0]['id'];
+        // print_r($cityId);
+        
+        curl_close($cityResource);
 
-        // $zomato_json = file_get_contents($zomato_url);
-        // $zomato_array = json_decode($zomato_json, true);
+        // Search Restauants Curl;
 
-
-        // $restaurants = $zomato_array['restaurants'];
-        // echo $restaurants;
-
-        // Using Curl;
-        $resource = curl_init($zomato_url);
+        $search_url = 'https://developers.zomato.com/api/v2.1/search?entity_id=' . $cityId .'&entity_type=city';
+        $resource = curl_init($search_url);
         curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($resource, CURLOPT_HTTPHEADER, array(
             'user-key: 93a6b94e44720afab279f89636f42cae'
@@ -19,7 +26,7 @@
         $result = curl_exec($resource);
         $data = json_decode($result, true);
         $restaurants = $data['restaurants'];
-
+        curl_close($resource);
       
 
     }
